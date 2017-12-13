@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"time"
 
-	b32 "github.com/wangbokun/gowork/googleauth"
+	b32 "github.com/wangbokun/gowork/base32"
 )
 
 // MakeGoogleAuthenticator 获取key&t对应的验证码
@@ -23,7 +23,7 @@ func MakeGoogleAuthenticator(key string, t int64) (string, error) {
 		return "", errors.New("输入有误")
 	}
 	snum := lastBit4byte(hs)
-	fmt.Println("snum = ", snum)
+	fmt.Println(snum)
 	d := snum % 1000000
 	return fmt.Sprintf("%06d", d), nil
 }
