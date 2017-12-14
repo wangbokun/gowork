@@ -9,18 +9,20 @@ import (
 	"time"
 
 	"github.com/luopengift/types"
+	"github.com/wangbokun/gowork/googleauth"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 type Endpoint struct {
-	Name     string `yaml:"name"`
-	Host     string `yaml:"host"`
-	Ip       string `yaml:"ip"`
-	Port     int    `yaml:"port"`
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	Key      string `yaml:"key"`
+	Name       string `yaml:"name"`
+	Host       string `yaml:"host"`
+	Ip         string `yaml:"ip"`
+	Port       int    `yaml:"port"`
+	User       string `yaml:"user"`
+	Password   string `yaml:"password"`
+	Key        string `yaml:"key"`
+	Googlecode string `yaml:"googlecode"`
 }
 
 type WindowSize struct {
@@ -32,15 +34,16 @@ func NewEndpoint() *Endpoint {
 	return &Endpoint{}
 }
 
-func NewEndpointWithValue(name, host, ip string, port int, user, password, key string) *Endpoint {
+func NewEndpointWithValue(name, host, ip string, port int, user, password, key, googlecode string) *Endpoint {
 	return &Endpoint{
-		Name:     name,
-		Host:     host,
-		Ip:       ip,
-		Port:     port,
-		User:     user,
-		Password: password,
-		Key:      key,
+		Name:       name,
+		Host:       host,
+		Ip:         ip,
+		Port:       port,
+		User:       user,
+		Password:   password,
+		Key:        key,
+		Googlecode: googlecode,
 	}
 }
 
@@ -50,9 +53,38 @@ func (ep *Endpoint) Init(filename string) error {
 
 // 解析登录方式
 func (ep *Endpoint) authMethods() ([]ssh.AuthMethod, error) {
-	authMethods := []ssh.AuthMethod{
-		ssh.Password(ep.Password),
+	// authMethods := []ssh.AuthMethod{
+	// 	ssh.Password(ep.Password),
+	// }
+	authMethods := []ssh.AuthMethod{}
+
+	if ep.Googlecode != "" {
+		GooglecodeBytes, err := ioutil.ReadFile(ep.Googlecode)
+		if err != nil {
+			return authMethods, err
+		}
+
+		gcode, err := googleauth.MakeGoogleAuthenticatorForNow(string(GooglecodeBytes))
+
+		// authMethods := []ssh.AuthMethod{}
+		keyboardInteractiveChallenge := func(
+			user,
+			instruction string,
+			questions []string,
+			echos []bool,
+		) (answers []string, err error) {
+			if len(questions) == 0 {
+				return []string{}, nil
+			}
+			return []string{gcode}, nil
+		}
+		authMethods = append(authMethods, ssh.Password(ep.Password))
+		authMethods = append(authMethods, ssh.KeyboardInteractive(keyboardInteractiveChallenge))
+		// return authMethods, nil
+	} else {
+		ssh.Password(ep.Password)
 	}
+
 	keyBytes, err := ioutil.ReadFile(ep.Key)
 	if err != nil {
 		return authMethods, err
