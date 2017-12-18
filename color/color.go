@@ -1,7 +1,9 @@
 /**
   打印字符颜色
+  Use:
+  color.Green("SSH key %s created!")
 */
-package logs
+package color
 
 import (
 	"fmt"
@@ -18,6 +20,7 @@ const (
 
 func Color(s interface{}, col uint8) string {
 	str := fmt.Sprintf("\x1b[%dm%v\x1b[0m", col, s)
+	fmt.Println(str)
 	return str
 }
 

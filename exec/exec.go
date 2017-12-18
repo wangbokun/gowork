@@ -4,13 +4,13 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/fatih/color"
+	"github.com/wangbokun/gowork/color"
 )
 
-const (
-	CheckSymbol = "\u2714 "
-	CrossSymbol = "\u2716 "
-)
+// const (
+// 	CheckSymbol = "\u2714 "
+// 	CrossSymbol = "\u2716 "
+// )
 
 func Execute(workDir, script string, args ...string) bool {
 	cmd := exec.Command(script, args...)
@@ -24,7 +24,7 @@ func Execute(workDir, script string, args ...string) bool {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		color.Red("%s%s", CrossSymbol, err.Error())
+		color.Red(err.Error())
 		return false
 	}
 
