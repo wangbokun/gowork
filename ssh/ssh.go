@@ -79,7 +79,8 @@ func (ep *Endpoint) authMethods() ([]ssh.AuthMethod, error) {
 			return []string{gcode}, nil
 		}
 		authMethods = append(authMethods, ssh.Password(ep.Password))
-		authMethods = append(authMethods, ssh.KeyboardInteractive(keyboardInteractiveChallenge))
+		// authMethods = append(authMethods, ssh.PasswordCallback(gcode))
+		authMethods = append(authMethods, ssh.KeyboardInteractiveChallenge(keyboardInteractiveChallenge))
 		// return authMethods, nil
 	} else {
 		ssh.Password(ep.Password)
