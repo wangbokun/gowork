@@ -32,7 +32,8 @@ func Red(v interface{}) string {
 	return Color(v, RED)
 }
 
-func Green(v interface{}) string {
+func Green(v ...interface{}) string {
+	// return Color(strings.Join(v, ''))
 	return Color(v, GREEN)
 }
 
