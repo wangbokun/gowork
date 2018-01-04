@@ -17,7 +17,7 @@ const (
 )
 
 var (
-	ConfigLocation = `/tmp/.tsocks-%s:%s.conf`
+	ConfigLocation = `/tmp/.ops-socket-%s:%s.conf`
 	PasswordConfig = `
 local = 192.168.0.0/255.255.0.0
 local = 127.0.0.1/255.0.0.0
