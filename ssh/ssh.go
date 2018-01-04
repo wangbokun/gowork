@@ -51,36 +51,42 @@ func (ep *Endpoint) Init(filename string) error {
 	return types.ParseConfigFile(filename, ep)
 }
 
+func getkey() string {
+	mykey := "xxxxxxxx"
+
+	code, err := googleauth.MakeGoogleAuthenticatorForNow(mykey)
+	if err != nil {
+		fmt.Println(code)
+	}
+	return code
+}
+
+func KeyboardInteractiveChallenge(user, instruction string, questions []string, echos []bool) (answers []string, err error) {
+	g_code := getkey()
+	if len(questions) != 1 {
+		return nil, nil
+	}
+	switch questions[0] {
+	case "Password: ":
+		return []string{"xxxxxxx"}, nil
+
+	case "Verification code: ":
+		return []string{g_code}, nil
+	default:
+		return nil, fmt.Errorf("questions is not known", questions[0])
+	}
+}
+
 // 解析登录方式
 func (ep *Endpoint) authMethods() ([]ssh.AuthMethod, error) {
-	// authMethods := []ssh.AuthMethod{
-	// 	ssh.Password(ep.Password),
-	// }
 	authMethods := []ssh.AuthMethod{}
 
 	if ep.Googlecode != "" {
-		GooglecodeBytes, err := ioutil.ReadFile(ep.Googlecode)
-		if err != nil {
-			return authMethods, err
-		}
+		authMethods = append(authMethods,
+			ssh.KeyboardInteractive(KeyboardInteractiveChallenge),
+		)
 
-		gcode, err := googleauth.MakeGoogleAuthenticatorForNow(string(GooglecodeBytes))
-
-		// authMethods := []ssh.AuthMethod{}
-		keyboardInteractiveChallenge := func(
-			user,
-			instruction string,
-			questions []string,
-			echos []bool,
-		) (answers []string, err error) {
-			if len(questions) == 0 {
-				return []string{}, nil
-			}
-			return []string{gcode}, nil
-		}
-		authMethods = append(authMethods, ssh.Password(ep.Password))
-		// authMethods = append(authMethods, ssh.PasswordCallback(gcode))
-		authMethods = append(authMethods, ssh.KeyboardInteractiveChallenge(keyboardInteractiveChallenge))
+		return authMethods, nil
 		// return authMethods, nil
 	} else {
 		ssh.Password(ep.Password)
